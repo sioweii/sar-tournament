@@ -4,22 +4,23 @@ Simple, easy to learn, easy to calculate. Out of all the other calculators I see
 
 HOW TO WORK: EASIEST WAY!
 
+Step 1: Download the file as ZIP
 
-Step 1: Copy the code, and put it into your notepad.
+Step 2: Open the code in notepad
 
-Step 2: Press File.
+Step 3: Press File.
 
-Step 3: Press Save As
+Step 4: Press Save As
 
-Step 4: Make sure the file is named as: "sar_tournament_manager.html" MAKE SURE THERE IS NO .txt BEHIND IT!
+Step 5: Make sure the file is named as: "sar_tournament_manager.html" MAKE SURE THERE IS NO .txt BEHIND IT!
 
-Step 5: Make sure the Save As Type is All files!
+Step 6: Make sure the Save As Type is All files!
 
-Step 6: Go to files on your desktop, and search for "sar_tournament" The file should pop up
+Step 7: Go to files on your desktop, and search for "sar_tournament" The file should pop up
 
-Step 7: Right click the file, and press open with Google, Microsoft, etc. ONLY APPS LIKE GOOGLE OR MICROSOFT OR THE APPLICATION WONT WORK!
+Step 8: Right click the file, and press open with Google, Microsoft, etc. ONLY APPS LIKE GOOGLE OR MICROSOFT OR THE APPLICATION WONT WORK!
 
-Step 8: Follow the steps below this
+Step 9: Follow the steps below this
 
 HOW TO USE? 
 
