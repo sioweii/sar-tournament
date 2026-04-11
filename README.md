@@ -1,8 +1,28 @@
-# Sar Tournament Calculator
-Simple SAR tournament calculator. This is probally the most simple, web-based calculator there is! 
-Simple, easy to learn, easy to calculate. Out of all the other calculators I see, this one is ONLY for tournaments or community events!
 
-HOW TO WORK: EASIEST WAY!
+# SAR Tournament Manager
+
+A simple browser-based tournament calculator for Super Animal Royale.
+
+## Features
+
+* Paste `/getplayers` output directly
+* Automatic scoring (kills + placement)
+* Multiple rounds
+* Team grouping system
+* Solos and Teams mode
+* Final leaderboard with placements
+* Custom scoring settings
+* Background color & gradient customization
+* 
+## Notes
+
+* Works entirely in browser (no install needed)
+* Data is saved locally
+
+## Made for Super Animal Royale tournaments
+
+
+## HOW TO WORK: EASIEST WAY!
 
 Step 1: Download the file as ZIP
 
@@ -22,7 +42,7 @@ Step 8: Right click the file, and press open with Google, Microsoft, etc. ONLY A
 
 Step 9: Follow the steps below this
 
-HOW TO USE? 
+## HOW TO USE? 
 
 Step 1: Press "Add Tournament" on the website, and name your tournament
 
