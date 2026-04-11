@@ -1,3 +1,12 @@
+Version 2.0
+Added:
+*Color changeable background
+*Teams
+*Fixed the group people
+*Made it easier to work
+
+Working on:
+*Dark or white mode (the text can be black or white)
 
 # SAR Tournament Manager
 
