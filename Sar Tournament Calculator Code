@@ -8,7 +8,7 @@
 
 body{
 font-family:Arial;
-background:#f2f2f2;
+background:#F7BACF;
 text-align:center;
 }
 
@@ -22,28 +22,36 @@ table{
 margin:auto;
 border-collapse:collapse;
 margin-top:10px;
+width:auto;
 }
 
 td,th{
 border:1px solid black;
 padding:6px 10px;
+white-space:nowrap;
 }
 
-.round{
-display:none;
+th{
+background:#ffffff55;
 }
 
-.active{
-display:block;
+/* ONLY name column wide */
+td:nth-child(2), th:nth-child(2){
+min-width:320px;
+white-space:normal;
 }
 
-.selected{
-background:#9fd3ff;
-}
+.round{ display:none; }
+.active{ display:block; }
 
-textarea{
-width:90%;
-}
+.selected{ background:#9fd3ff; }
+
+textarea{ width:90%; }
+
+/* PODIUM COLORS */
+.firstRow{ background:#FBC02D; }
+.secondRow{ background:#B0BEC5; }
+.thirdRow{ background:#cd7f32; }
 
 </style>
 
@@ -65,6 +73,7 @@ width:90%;
 
 let tournaments=[]
 let currentTournament=0
+let mode="teams"
 
 function addTournament(){
 
@@ -75,9 +84,6 @@ let id=tournaments.length
 
 tournaments.push({
 name:name,
-mode:"solos",
-players:{},
-teams:{},
 rounds:[]
 })
 
@@ -102,13 +108,22 @@ document.getElementById("tournamentArea").innerHTML=`
 <h2>${t.name}</h2>
 
 <h3>Mode</h3>
+<select onchange="changeMode(this.value)">
+<option value="teams">Teams</option>
+<option value="solos">Solos</option>
+</select>
 
-<button onclick="setMode('solos')">Solos</button>
-<button onclick="setMode('duos')">Duos</button>
-<button onclick="setMode('trios')">Trios</button>
-<button onclick="setMode('squads')">Squads</button>
+<h3>Background</h3>
 
-<p>Current Mode: <b id="modeDisplay">${t.mode}</b></p>
+<input type="text" id="bg1" value="#F7BACF">
+<input type="text" id="bg2" placeholder="#color1">
+<input type="text" id="bg3" placeholder="#color2">
+
+<br><br>
+
+<button onclick="applyBG()">Apply Background</button>
+
+<hr>
 
 <h3>Scoring</h3>
 
@@ -137,14 +152,9 @@ Kill <input id="sk" value="1">
 <div id="roundTabs"></div>
 <div id="roundContainer"></div>
 
-<h2>Leaderboard</h2>
+<h2>Final Leaderboard</h2>
 
-<table id="leaderboard">
-<tr>
-<th>Player / Team</th>
-<th>Total Points</th>
-</tr>
-</table>
+<table id="leaderboard"></table>
 
 `
 
@@ -152,13 +162,22 @@ drawLeaderboard()
 
 }
 
-function setMode(mode){
+function changeMode(val){
+mode=val
+drawLeaderboard()
+}
 
-let t=tournaments[currentTournament]
+function applyBG(){
 
-t.mode=mode
+let single=document.getElementById("bg1").value
+let g1=document.getElementById("bg2").value
+let g2=document.getElementById("bg3").value
 
-document.getElementById("modeDisplay").innerText=mode
+if(g1 && g2){
+document.body.style.background=`linear-gradient(to right, ${g1}, ${g2})`
+}else{
+document.body.style.background=single
+}
 
 }
 
@@ -167,7 +186,6 @@ function addRound(){
 let t=tournaments[currentTournament]
 
 let num=t.rounds.length+1
-
 t.rounds.push([])
 
 let tab=document.createElement("button")
@@ -181,23 +199,17 @@ div.id="round"+num
 div.className="round"
 
 div.innerHTML=`
-
 <h3>Round ${num}</h3>
-
 <table>
-
 <tr>
 <th>Team</th>
-<th>Players</th>
+<th>Player</th>
 <th>Kills</th>
 <th>Placement Points</th>
 <th>Place</th>
 </tr>
-
 <tbody id="roundBody${num}"></tbody>
-
 </table>
-
 `
 
 document.getElementById("roundContainer").appendChild(div)
@@ -211,7 +223,6 @@ function showRound(i){
 document.querySelectorAll(".round").forEach(r=>r.classList.remove("active"))
 
 let div=document.getElementById("round"+(i+1))
-
 if(div)div.classList.add("active")
 
 }
@@ -249,7 +260,6 @@ if(!active)return
 let roundIndex=Number(active.id.replace("round",""))-1
 
 let lines=text.split("\n")
-
 let data=[]
 
 lines.forEach(line=>{
@@ -258,21 +268,26 @@ if(line.startsWith("pID")||line.trim()==="")return
 
 let parts=line.trim().split(/\s+/)
 
-let placement=Number(parts[parts.length-1])
-let kills=Number(parts[parts.length-2])
+let kills = Number(parts[parts.length-3])
+let placement = Number(parts[parts.length-2])
 
-let nameParts=parts.slice(1,parts.length-5)
-let player=nameParts.join(" ")
+// ✅ PERFECT NAME PARSER
+let playerParts=[]
+for(let i=1;i<parts.length;i++){
+if(/^[A-F0-9]{8,}$/i.test(parts[i]) || parts[i]==="-1"){
+break
+}
+playerParts.push(parts[i])
+}
 
-let placementPoints=placementScore(placement)
+let player=playerParts.join(" ")
 
-let score=kills*Number(document.getElementById("sk").value)+placementPoints
+let score=kills*Number(document.getElementById("sk").value)+placementScore(placement)
 
 data.push({
 player,
 kills,
 place:placement,
-placementPoints,
 score,
 team:null
 })
@@ -284,29 +299,24 @@ data.sort((a,b)=>a.place-b.place)
 t.rounds[roundIndex]=data
 
 drawRound(roundIndex)
-
-recalcLeaderboard()
+drawLeaderboard()
 
 }
 
 function drawRound(i){
 
 let body=document.getElementById("roundBody"+(i+1))
-
 body.innerHTML=""
 
 tournaments[currentTournament].rounds[i].forEach(p=>{
 
 let row=body.insertRow()
-
 row.onclick=()=>row.classList.toggle("selected")
 
-let teamCell=row.insertCell(0)
-teamCell.innerText=p.team||"-"
-
+row.insertCell(0).innerText=p.team||"-"
 row.insertCell(1).innerText=p.player
 row.insertCell(2).innerText=p.kills
-row.insertCell(3).innerText=p.placementPoints
+row.insertCell(3).innerText=placementScore(p.place)
 row.insertCell(4).innerText=p.place
 
 })
@@ -315,53 +325,23 @@ row.insertCell(4).innerText=p.place
 
 function groupPlayers(){
 
-let selected=document.querySelectorAll(".selected")
+if(mode==="solos") return alert("Switch to Teams mode!")
 
+let selected=document.querySelectorAll(".selected")
 if(selected.length<2)return
 
 let teamName=prompt("Team Name")
 if(!teamName)return
 
 let t=tournaments[currentTournament]
-
 let roundIndex=Number(document.querySelector(".round.active").id.replace("round",""))-1
 
 selected.forEach(r=>{
-
 let player=r.cells[1].innerText
-
-let playerObj=t.rounds[roundIndex].find(p=>p.player===player)
-
-playerObj.team=teamName
-
+let obj=t.rounds[roundIndex].find(p=>p.player===player)
+obj.team=teamName
 r.cells[0].innerText=teamName
-
 r.classList.remove("selected")
-
-})
-
-recalcLeaderboard()
-
-}
-
-function recalcLeaderboard(){
-
-let t=tournaments[currentTournament]
-
-t.players={}
-
-t.rounds.forEach(round=>{
-
-round.forEach(p=>{
-
-let name=p.team||p.player
-
-if(!t.players[name])t.players[name]=0
-
-t.players[name]+=p.score
-
-})
-
 })
 
 drawLeaderboard()
@@ -371,35 +351,88 @@ drawLeaderboard()
 function drawLeaderboard(){
 
 let t=tournaments[currentTournament]
-
 let table=document.getElementById("leaderboard")
 
-table.innerHTML=`
-<tr>
-<th>Player / Team</th>
-<th>Total Points</th>
-</tr>
-`
+if(mode==="solos"){
 
-let sorted=Object.entries(t.players).sort((a,b)=>b[1]-a[1])
+table.innerHTML=`<tr><th>Name</th><th>Points</th><th>Place</th></tr>`
 
-sorted.forEach(p=>{
+let players={}
+
+t.rounds.forEach(r=>{
+r.forEach(p=>{
+players[p.player]=(players[p.player]||0)+p.score
+})
+})
+
+let sorted=Object.entries(players).sort((a,b)=>b[1]-a[1])
+let place=1
+
+sorted.forEach((p,i)=>{
+
+if(i>0 && p[1]<sorted[i-1][1]) place++
 
 let row=table.insertRow()
 
+if(place===1) row.classList.add("firstRow")
+if(place===2) row.classList.add("secondRow")
+if(place===3) row.classList.add("thirdRow")
+
 row.insertCell(0).innerText=p[0]
 row.insertCell(1).innerText=p[1]
+row.insertCell(2).innerText=place
+
+})
+
+return
+}
+
+// TEAMS
+
+table.innerHTML=`<tr><th>Team</th><th>Players</th><th>Total</th><th>Place</th></tr>`
+
+let teams={}
+
+t.rounds.forEach(r=>{
+r.forEach(p=>{
+
+let teamName=p.team||p.player
+
+if(!teams[teamName]){
+teams[teamName]={players:new Set(), total:0}
+}
+
+teams[teamName].players.add(p.player)
+teams[teamName].total+=p.score
+
+})
+})
+
+let sorted=Object.entries(teams).sort((a,b)=>b[1].total-a[1].total)
+let place=1
+
+sorted.forEach((team,i)=>{
+
+if(i>0 && team[1].total<sorted[i-1][1].total) place++
+
+let row=table.insertRow()
+
+if(place===1) row.classList.add("firstRow")
+if(place===2) row.classList.add("secondRow")
+if(place===3) row.classList.add("thirdRow")
+
+row.insertCell(0).innerText=team[0]
+row.insertCell(1).innerText=[...team[1].players].join(", ")
+row.insertCell(2).innerText=team[1].total
+row.insertCell(3).innerText=place
 
 })
 
 }
 
 function finishTournament(){
-
 localStorage.setItem("sar_tournaments",JSON.stringify(tournaments))
-
 alert("Tournament Saved")
-
 }
 
 </script>
